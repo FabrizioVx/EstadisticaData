@@ -1,0 +1,92 @@
+---
+title: "grit"
+author: "FVJ"
+date: "11/2/2020"
+output: html_document
+---
+```{r}
+
+library(MASS)
+library(car)
+library(mvnormtest)
+#library(biotools)
+library(nortest)
+#library(RODBC)
+library(lmtest)
+library(readxl)
+
+GRIT=read_excel(file.choose()) # Solo usarlo una vez, luego comentar esta parte
+attach(GRIT) # Solo usarlo una vez, luego comentar esta parte
+
+# Crear modelo
+GRIT_model<-step(lm(X16~X1+X2+X3+X4+X5+X6+X7+X8+X9+X10+X11+X12+X13+X14+X15+X17+X18+X19,data = GRIT),direction = "both")
+summary(GRIT_model)
+
+#TRANSFORMANDO A FACTORES LAS VARIABLES CUALITATIVAS y DESCRIPTIVO DE VARIABLES CUALITATIVAS
+GRIT %>%
+  mutate_if(is.numeric,as.factor) %>%
+  mutate(X1 = as.numeric(X1), X16 = as.numeric(X16), X19 = as.numeric(X19), `ID de respuesta` = as.numeric(`ID de respuesta`)) %>%
+  summarise_if(is.factor, nlevels)
+
+#BOX PLOT CON PUNTOS
+boxplot(X16~X8, data = GRIT, notch = TRUE)
+stripchart(X16~X8, vertical = TRUE, method = "jitter", pch = 19, add = TRUE, col = c("blue","red","green","purple","brown"))
+
+#BOXPLOT CON HISTOGRAMA
+# Histograma
+hist(X1, probability = TRUE, ylab = "", col = "grey",
+     axes = FALSE, main = "")
+
+axis(1) # Eje
+
+lines(density(X1), col = "red", lwd = 2) # Densidad de la línea
+
+par(new = TRUE)
+boxplot(X19, horizontal = TRUE, axes = FALSE,
+        lwd = 2, col = rgb(0, 1, 1, alpha = 0.15)) # Boxplot
+
+#Probando el Modelo de Variable Aleatoría - Normalidad
+lillie.test(X19) # Test de Kolmogorov-Smirnov para muestras grandes (>50)
+
+pairs(~X1+X16+X17+X19, data = GRIT) # devuelve una matriz gráfica, con diagramas de dispersión con cada par de variables
+
+#DESCRIPTIVO DE VARIABLES CUANTITATIVA
+#type Code Nombre	nlevel	levels
+#num	X1	Edad		Entero
+#fct	X2	Género	3	1 Masculino, 2 Femenino, 3 Otro
+#fct	X3	Región Geográfica de nacimiento	2	0 Provincia 1 Lima-Callao
+#fct	X4	Tipo de Familia	2	0 no nuclear, 1 nuclear
+#fct	X5	Carrera	2	0 Carrera primigenia 1 Carrera nueva
+#fct	X6	Periodo de Ingreso	3	1 2015-2016-2017 , 2 2018, 3 2019-2020 
+#fct	X7	Escala	5	1 A, 2 B, 3 C, 4 D, 5 E
+#fct	X8	Becado	2	0 No tiene ayuda Economica, 1 Si tiene ayuda económica
+#fct	X9	Colegio	2	1 Público , 2 Privado
+#fct	X10	Experiencia Academica	2	0 No tiene experiencia , 1 tiene experiencia (No se considera trabajos previos)
+#fct	X11	Organizacion Estudiantil	2	0 No pertenece, 1 Pertenece
+#fct	X12	Libros leidos	2	0 (menos de 2), 1 (mas de dos)
+#fct	X13	Tiempo de Lectura	3	1 (menos de 30 min), 2 (entre 30 - 60min) , 3(mas de una hora)
+#fct	X14	Libros en Casa	2	0 (menos de 50 libros), 1 (mas de 50)
+#fct	X15	Perfil Digital	2	0 (sin dispositivos modernos), 1(con dispositivos digitales)
+#num	X16	GPA		Flotante
+#fct	X17	Ranking	5	1 Top 10, 2 Décimo Superior, 3 Quinto Superior, 4 Tercio Superior, 5 Otro
+#fct	X18	Experiencia Universitaria	2	0 (con experiencia), 1 (sin experiencia)
+#num	X19	GRIT		Flotante
+
+```
+```{r}
+library(likert)
+library(dplyr)
+library(xtable)
+library(psych)
+library(reshape2)
+library(gridExtra)
+library(grid)
+library(ggplot2)
+library(plyr)
+library(car)
+
+#Matriz de correlaciones
+DF_GRIT <- data.frame(X1,X2,X3,X4,X5,X6,X7,X8,X9,X10,X11,X12,X13,X14,X15,X16,X17,X18,X19)
+mcorr_grit <- corr.test(DF_GRIT, alpha=.05)
+print(corr.p(mcorr_grit$r,n=75,adjust="holm",alpha=.05), short=FALSE)
+```
